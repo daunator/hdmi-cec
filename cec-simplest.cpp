@@ -106,15 +106,20 @@ int main(int argc, char* argv[])
     std::cout << "Ready to send commands..." << std::endl;
 
     CEC::cec_command play_cmd = cec_adapter->CommandFromString("14:44:44");
+    CEC::cec_command stop_cmd = cec_adapter->CommandFromString("14:44:45");
     CEC::cec_command pause_cmd = cec_adapter->CommandFromString("14:44:46");
     bool playing = true;
     int value;
     while ((value = keypress(0)) != 'q')
     {
-      if (value == ' ')
+      if (value == ' ') // Space was pressed
       {
         cec_adapter->Transmit(playing ? pause_cmd : play_cmd);
         playing = !playing;
+      }
+      else if (value == '\x1B') // Escape was pressed
+      {
+        cec_adapter->Transmit(stop_cmd);
       }
     }
     
