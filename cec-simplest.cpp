@@ -1,5 +1,5 @@
 // Build command:
-// g++-4.8 -std=gnu++0x -fPIC -g -Wall -march=armv6 -mfpu=vfp -mfloat-abi=hard -isystem /opt/vc/include/ -isystem /opt/vc/include/interface/vcos/pthreads/ -isystem /opt/vc/include/interface/vmcs_host/linux/ -I/usr/local/include -L /opt/vc/lib -lcec -lbcm_host -ldl cec-simplest.cpp -o cec-simplest 
+// g++ -std=c++1z -fPIC -g -Wall -march=armv6 -mfpu=vfp -mfloat-abi=hard -isystem /opt/vc/include/ -isystem /opt/vc/include/interface/vcos/pthreads/ -isystem /opt/vc/include/interface/vmcs_host/linux/ -I/usr/local/include -L /opt/vc/lib -lcec -lbcm_host -ldl cec-simplest.cpp -o cec-simplest
 //#CXXFLAGS=-I/usr/local/include
 //#LINKFLAGS=-lcec -ldl
 #include <libcec/cec.h>
@@ -109,17 +109,28 @@ int main(int argc, char* argv[])
     CEC::cec_command stop_cmd = cec_adapter->CommandFromString("14:44:45");
     CEC::cec_command pause_cmd = cec_adapter->CommandFromString("14:44:46");
     bool playing = true;
-    int value;
-    while ((value = keypress(0)) != 'q')
+    int key;
+    while ((key = keypress(0)) != 'q')
     {
-      if (value == ' ') // Space was pressed
+      switch(key)
       {
-        cec_adapter->Transmit(playing ? pause_cmd : play_cmd);
-        playing = !playing;
-      }
-      else if (value == '\x1B') // Escape was pressed
-      {
-        cec_adapter->Transmit(stop_cmd);
+        // Enter was pressed
+        case 0x0a:
+          cec_adapter->Transmit(playing ? pause_cmd : play_cmd);
+          playing = !playing;
+	  break;
+        // Space was pressed
+	case 0x20:
+          cec_adapter->Transmit(stop_cmd);
+	  break;
+        // Escape was pressed
+        case 0x1b:
+          cec_adapter->Transmit(play_cmd);
+          break;
+
+	default:
+	  // nothing
+          break;
       }
     }
     
